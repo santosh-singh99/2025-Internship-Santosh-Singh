@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic News Feed</title>
+
+
+    <!--THE CSS Part of the code -->
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.article-form, .news-feed, .pagination {
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.news-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.article {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.article img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.article h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination .active {
+    background-color: #0056b3;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Article Form Section -->
+        <section class="article-form">
+            <h2>Submit a News Article</h2>
+            <form id="articleForm">
+                <input type="text" id="title" placeholder="Article Title" required>
+                <textarea id="description" placeholder="Article Description" required></textarea>
+                <input type="url" id="imageUrl" placeholder="Optional Image URL">
+                <button type="submit">Add Article</button>
+            </form>
+        </section>
+
+        <!-- News Feed Section -->
+        <section class="news-feed" id="newsFeed">
+        </section>
+
+        <!-- Pagination Controls -->
+        <div class="pagination" id="paginationControls">
+        </div>
+    </div>
+
+
+
+    <!--The JAVA SCRIPT Part of the code -->
+    <script>
+        const articleForm = document.getElementById('articleForm');
+const titleInput = document.getElementById('title');
+const descriptionInput = document.getElementById('description');
+const imageUrlInput = document.getElementById('imageUrl');
+const newsFeed = document.getElementById('newsFeed');
+const paginationControls = document.getElementById('paginationControls');
+
+let articles = [];
+let currentPage = 1;
+const articlesPerPage = 4;
+
+// Handle article form submission
+articleForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    
+    const title = titleInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const imageUrl = imageUrlInput.value.trim();
+
+    if (title && description) {
+        const newArticle = {
+            title,
+            description,
+            imageUrl: imageUrl || null
+        };
+        
+        articles.push(newArticle);
+        titleInput.value = '';
+        descriptionInput.value = '';
+        imageUrlInput.value = '';
+
+        renderArticles();
+        renderPagination();
+    } else {
+        alert('Please fill out both the title and description fields.');
+    }
+});
+
+// Render articles based on the current page
+function renderArticles() {
+    newsFeed.innerHTML = '';
+
+    const startIndex = (currentPage - 1) * articlesPerPage;
+    const endIndex = startIndex + articlesPerPage;
+    const articlesToDisplay = articles.slice(startIndex, endIndex);
+
+    articlesToDisplay.forEach(article => {
+        const articleDiv = document.createElement('div');
+        articleDiv.classList.add('article');
+        
+        const articleContent = `
+            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="Article Image">` : ''}
+            <h3>${article.title}</h3>
+            <p>${article.description}</p>
+        `;
+        
+        articleDiv.innerHTML = articleContent;
+        newsFeed.appendChild(articleDiv);
+    });
+}
+
+// Render pagination controls
+function renderPagination() {
+    paginationControls.innerHTML = '';
+    
+    const totalPages = Math.ceil(articles.length / articlesPerPage);
+    
+    const prevButton = document.createElement('button');
+    prevButton.textContent = 'Previous';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => changePage(currentPage - 1));
+    paginationControls.appendChild(prevButton);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.classList.toggle('active', i === currentPage);
+        pageButton.addEventListener('click', () => changePage(i));
+        paginationControls.appendChild(pageButton);
+    }
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Next';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => changePage(currentPage + 1));
+    paginationControls.appendChild(nextButton);
+}
+
+// Change the current page
+function changePage(page) {
+    currentPage = page;
+    renderArticles();
+    renderPagination();
+}
+
+// Initialize the page
+renderArticles();
+renderPagination();
+
+    </script>
+</body>
+</html>
